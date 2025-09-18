@@ -6,6 +6,7 @@ package lib;
 public class Room {
     private final String nameRoom;
     private final int idRoom;
+    private final double price;
     private boolean status;
     //Rep Invariant (RI)
     //  - nameRoom is not null && not blank
@@ -31,9 +32,10 @@ public class Room {
      * @param idRoom เลขห้อง
      * @throws IllegalArgumentException หากคุณสมบัติของห้องไม่ถูกต้อง
      */
-    public Room(String nameRoom,int idRoom){
+    public Room(String nameRoom,int idRoom,double price){
         this.nameRoom = nameRoom;
         this.idRoom = idRoom;
+        this.price = price;
         this.status = false;
         checkRep(); 
     }
@@ -56,6 +58,9 @@ public class Room {
     }
     public void setStatus(boolean check){
         status = check;
+    }
+    public double getPrice() {
+        return price;
     }
 
     @Override
