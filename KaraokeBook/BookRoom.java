@@ -1,24 +1,37 @@
 import lib.Room;
 import lib.RoomSystem;
+import lib.RoomTime;
 import lib.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.*;
 
 public class BookRoom extends JFrame {
     DefaultListModel<String> ModelList1;
     DefaultListModel<String> ModelList2;
+    int year, month, day;
+    int hourStart = 13;
+    int hourEnd = 23;
+    int minuteStartEnd = 00;
+    User user = new User(1);
+    Room room = new Room("1-5", 101, 150);
+    
     static RoomSystem system;
     public BookRoom() {
+        year = LocalDate.now().getYear();
+        month = LocalDate.now().getMonthValue();
+        day = LocalDate.now().getDayOfMonth();
+        System.out.println(day+" "+month+" "+year);
         ModelList1 = new DefaultListModel<>();
         ModelList2 = new DefaultListModel<>();
-        for (int i = 0; i < 11; i++) {
-            if (!(system.checkTimeIsSame(LocalTime.of(12 + i, 0)))) {
-                ModelList1.addElement((12 + i) + ":00-" + (13 + i) + ":00"); // ยังมีบัค24:00
-            }
+        for (int i = 0; i < hourEnd-hourStart; i++) {
+            if (!(system.checkLocalDateTimeIsSame(room,LocalDateTime.of(year, month, day, hourStart+i, minuteStartEnd))))
+            {
+                ModelList1.addElement((hourStart + i) + ":"+minuteStartEnd+"0-" + (hourStart + i+1) + ":"+minuteStartEnd+"0"); // ยังมีบัค24:00
+           }
         }
         initComponents();
     }
@@ -75,7 +88,7 @@ public class BookRoom extends JFrame {
         jButton1.setText("RemoveRoom");
         jButton1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonRemoveRoom(evt);
             }
         });
 
@@ -85,7 +98,7 @@ public class BookRoom extends JFrame {
         jButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                jButton2ActionPerformed(e);
+                jButtonAddRoom(e);
             }
         });
 
@@ -95,7 +108,7 @@ public class BookRoom extends JFrame {
         jButton3.setText("Confirm");
         jButton3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                jButtonConfirmRoom(evt);
             }
         });
 
@@ -152,7 +165,7 @@ public class BookRoom extends JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(ActionEvent evt) {
+    private void jButtonRemoveRoom(ActionEvent evt) {
         if (jList2.getSelectedValue() != null) {
             // System.out.println(jList2.getSelectedValue());
             ModelList1.addElement(jList2.getSelectedValue());
@@ -168,9 +181,8 @@ public class BookRoom extends JFrame {
         }
     }
 
-    private void jButton2ActionPerformed(ActionEvent evt) {
+    private void jButtonAddRoom(ActionEvent evt) {
         if (jList1.getSelectedValue() != null) {
-            // System.out.println(jList1.getSelectedValue());
             ModelList2.addElement(jList1.getSelectedValue());
             ArrayList<String> listSort = Collections.list(ModelList2.elements());
             Collections.sort(listSort);
@@ -184,18 +196,15 @@ public class BookRoom extends JFrame {
         }
     }
 
-    private void jButton3ActionPerformed(ActionEvent evt) {
+    private void jButtonConfirmRoom(ActionEvent evt) {
         for (int i = 0; i < ModelList2.size(); i++) {
             String tempModel = ModelList2.get(i);
             String[] tempArray = tempModel.split("[:\\-]");
-            system.addBookRoom(
-                    LocalTime.of(Integer.parseInt(tempArray[0]), Integer.parseInt(tempArray[1])),
-                    LocalTime.of(Integer.parseInt(tempArray[2]), Integer.parseInt(tempArray[3])));
+            system.addBookRoom(room, user, LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[0]), Integer.parseInt(tempArray[1]))
+            ,LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[2]), Integer.parseInt(tempArray[3])));
         }
         ModelList2.clear();
         jList2.setModel(ModelList2);
-        system.setupRoomUser();
-        system.showRoomUser();
     }
 
     /**
@@ -203,18 +212,11 @@ public class BookRoom extends JFrame {
      */
     public static void main(String args[]) {
         system = new RoomSystem();
-        User B = new User(2);
         Room room1 = new Room("1-5", 101, 150);
-        system.registerId(B);
-        system.loginId(B);
-        system.selectRoom(room1);
-        system.addBookRoom(LocalTime.of(12, 00), LocalTime.of(13, 00));
-        system.addBookRoom(LocalTime.of(16, 00), LocalTime.of(17, 00));
-
-        User A = new User(1);
-        system.registerId(A);
-        system.loginId(A);
-        system.selectRoom(room1);
+        User user1 = new User(2);
+        system.addBookRoom(room1, user1, LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 12, 0, 0), LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 13, 0, 0));
+        system.addBookRoom(room1, user1, LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 15, 0, 0), LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 16, 0, 0));
+        
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

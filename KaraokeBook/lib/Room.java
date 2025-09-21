@@ -7,7 +7,6 @@ public class Room {
     private final String nameRoom;
     private final int idRoom;
     private final double price;
-    private boolean status;
     //Rep Invariant (RI)
     //  - nameRoom is not null && not blank
     //  - idRoom > 0
@@ -36,7 +35,6 @@ public class Room {
         this.nameRoom = nameRoom;
         this.idRoom = idRoom;
         this.price = price;
-        this.status = false;
         checkRep(); 
     }
 
@@ -53,12 +51,6 @@ public class Room {
     public String getNameRoom() {
         return nameRoom;
     }
-    public boolean getStatus(){
-        return status;
-    }
-    public void setStatus(boolean check){
-        status = check;
-    }
     public double getPrice() {
         return price;
     }
@@ -69,5 +61,9 @@ public class Room {
         if (obj == null || getClass() != obj.getClass()) return false;
         Room room = (Room) obj;
         return idRoom == room.idRoom;
+    }
+    @Override
+    public String toString(){
+        return getNameRoom()+" "+getIdRoom()+" "+getPrice();
     }
 }
