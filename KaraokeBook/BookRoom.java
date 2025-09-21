@@ -1,6 +1,5 @@
 import lib.Room;
 import lib.RoomSystem;
-import lib.RoomTime;
 import lib.User;
 
 import javax.swing.*;
@@ -18,20 +17,24 @@ public class BookRoom extends JFrame {
     int minuteStartEnd = 00;
     User user = new User(1);
     Room room = new Room("1-5", 101, 150);
-    
+
     static RoomSystem system;
+
     public BookRoom() {
         year = LocalDate.now().getYear();
         month = LocalDate.now().getMonthValue();
         day = LocalDate.now().getDayOfMonth();
-        System.out.println(day+" "+month+" "+year);
+        System.out.println(day + " " + month + " " + year);
         ModelList1 = new DefaultListModel<>();
         ModelList2 = new DefaultListModel<>();
-        for (int i = 0; i < hourEnd-hourStart; i++) {
-            if (!(system.checkLocalDateTimeIsSame(room,LocalDateTime.of(year, month, day, hourStart+i, minuteStartEnd))))
-            {
-                ModelList1.addElement((hourStart + i) + ":"+minuteStartEnd+"0-" + (hourStart + i+1) + ":"+minuteStartEnd+"0"); // ยังมีบัค24:00
-           }
+        for (int i = 0; i < hourEnd - hourStart; i++) {
+            if (!(system.checkLocalDateTimeIsSame(room,
+                    LocalDateTime.of(year, month, day, hourStart + i, minuteStartEnd),
+                    LocalDateTime.of(year, month, day, hourStart + i +1, minuteStartEnd))
+                    )) {
+                ModelList1.addElement((hourStart + i) + ":" + minuteStartEnd + "0-" + (hourStart + i + 1) + ":"
+                        + minuteStartEnd + "0"); // ยังมีบัค24:00
+            }
         }
         initComponents();
     }
@@ -200,8 +203,15 @@ public class BookRoom extends JFrame {
         for (int i = 0; i < ModelList2.size(); i++) {
             String tempModel = ModelList2.get(i);
             String[] tempArray = tempModel.split("[:\\-]");
-            system.addBookRoom(room, user, LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[0]), Integer.parseInt(tempArray[1]))
-            ,LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[2]), Integer.parseInt(tempArray[3])));
+            try {
+                system.addBookRoom(room, user,
+                        LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[0]),
+                                Integer.parseInt(tempArray[1])),
+                        LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[2]),
+                                Integer.parseInt(tempArray[3])));
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
         ModelList2.clear();
         jList2.setModel(ModelList2);
@@ -214,9 +224,24 @@ public class BookRoom extends JFrame {
         system = new RoomSystem();
         Room room1 = new Room("1-5", 101, 150);
         User user1 = new User(2);
-        system.addBookRoom(room1, user1, LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 12, 0, 0), LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 13, 0, 0));
-        system.addBookRoom(room1, user1, LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 15, 0, 0), LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth(), 16, 0, 0));
-        
+        try {
+            system.addBookRoom(room1, user1,
+                    LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                            LocalDate.now().getDayOfMonth(),
+                            12, 0, 0),
+                    LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                            LocalDate.now().getDayOfMonth(),
+                            13, 0, 0));
+            system.addBookRoom(room1, user1,
+                    LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                            LocalDate.now().getDayOfMonth(),
+                            15, 0, 0),
+                    LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                            LocalDate.now().getDayOfMonth(),
+                            16, 0, 0));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

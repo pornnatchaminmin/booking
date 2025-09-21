@@ -21,25 +21,5 @@ public class app {
         // LocalDateTime.of(2025, 10, 1, 15, 0, 0));
         // Java program to illustrate the GridLayout
         
-        JFrame frame = new JFrame("Scroll Test");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        JPanel panel = new JPanel(null); // ใช้ layout แบบ null
-        panel.setPreferredSize(new java.awt.Dimension(800, 600)); // ต้องกำหนดเอง
-
-        JButton b1 = new JButton("Button 1");
-        b1.setBounds(50, 50, 100, 30);
-        panel.add(b1);
-
-        JButton b2 = new JButton("Button 2");
-        b2.setBounds(700, 500, 100, 30); // เลยขอบ จะทำให้ scrollbar โผล่
-        panel.add(b2);
-
-        JScrollPane scrollPane = new JScrollPane(panel);
-        frame.add(scrollPane);
-
-        frame.setSize(400, 300);
-        frame.setVisible(true);
-
     }
 }

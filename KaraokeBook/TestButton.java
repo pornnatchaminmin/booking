@@ -7,23 +7,25 @@ import lib.User;
 
 import java.util.logging.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.time.LocalDate;
 
 public class TestButton extends JFrame {
     JLabel[] jLabelRoom;
     JLabel[] jLabelAvalible;
     JPanel[] jPanelBooking;
     JButton[] jButton;
+    LocalDate date;
     RoomSystem system;
+    //อาจจะต้องมีเก็บ User ไว้ส่งไปที่อื่น
 
-    public TestButton(RoomSystem system) {
+    public TestButton(RoomSystem system) {//
         this.system = system;
 
-        jLabelRoom = new JLabel[100];
-        jLabelAvalible = new JLabel[100];
-        jPanelBooking = new JPanel[100];
-        jButton = new JButton[100];
+        jLabelRoom = new JLabel[100];//
+        jLabelAvalible = new JLabel[100];//
+        jPanelBooking = new JPanel[100];//
+        jButton = new JButton[100];//
         initComponents();
     }
 
@@ -36,8 +38,9 @@ public class TestButton extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(new Dimension(540, 960));
         setLocationRelativeTo(null);
+        setResizable(false);
         
-        jScrollPane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);//
 
         // ----------------------------- SetupRoom --------------------------------
         int x = 20, y = 20, count = 0;
@@ -59,32 +62,17 @@ public class TestButton extends JFrame {
             jButton[i].setText("Booking");
             jButton[i].setAlignmentX(Component.CENTER_ALIGNMENT);
             jButton[i].putClientProperty(1, new Room(room.getNameRoom(), room.getIdRoom(), room.getPrice()));
-            jButton[i].addMouseListener(new MouseListener() {
+            jButton[i].addActionListener(new ActionListener() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
-                }
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                            JButton tempButton = (JButton) e.getSource();//
-                            // System.out.println(tempButton.getClientProperty(1));//
+                public void actionPerformed(ActionEvent e) {
+                    JButton tempButton = (JButton) e.getSource();//
                             Room tempRoom = (Room) tempButton.getClientProperty(1);
                             System.out.println(tempRoom);
-                            //new BookRoom();
-                            new listbook(new User(1), tempRoom).setVisible(true);
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
+                            if(date == null){
+                                date = LocalDate.now();
+                            }
+                            listbook list = new listbook(new User(1), tempRoom,TestButton.this,date);
+                            list.setVisible(true);
                 }
             });
             jPanelBooking[i] = new JPanel();
@@ -121,7 +109,21 @@ public class TestButton extends JFrame {
 
         jScrollPane1.setViewportView(jPanel2);// เซ็ตjScroll ใน panel2
 
-        jComboBox1.setModel(new DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.setModel(new DefaultComboBoxModel<>(new String[] { "Today", LocalDate.now().plusDays(1).toString(), LocalDate.now().plusDays(2).toString()}));
+        jComboBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempS = (String)jComboBox1.getSelectedItem();
+                if(tempS.equals("Today")){
+                    date = LocalDate.now();
+                }
+                else{
+                    String[] tempSplit = tempS.split("[-]");
+                    date = LocalDate.of(Integer.parseInt(tempSplit[0]), Integer.parseInt(tempSplit[1]), Integer.parseInt(tempSplit[2]));
+                }
+            }
+            
+        });//
 
         GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -168,7 +170,7 @@ public class TestButton extends JFrame {
     public static void main(String args[]) {
         RoomSystem system = new RoomSystem();
         for (int i = 0; i < 10; i++) {
-            Room a = new Room("1-5", 101 + i, 150);
+            Room a = new Room("1-5", 301 + i, 150);
             system.addRoom(a);
         }
 
