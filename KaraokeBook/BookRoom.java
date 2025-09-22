@@ -15,7 +15,7 @@ public class BookRoom extends JFrame {
     int hourStart = 13;
     int hourEnd = 23;
     int minuteStartEnd = 00;
-    User user = new User(1);
+    User user = new User(1,150);
     Room room = new Room("1-5", 101, 150);
 
     static RoomSystem system;
@@ -223,7 +223,7 @@ public class BookRoom extends JFrame {
     public static void main(String args[]) {
         system = new RoomSystem();
         Room room1 = new Room("1-5", 101, 150);
-        User user1 = new User(2);
+        User user1 = new User(2,150);
         try {
             system.addBookRoom(room1, user1,
                     LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
