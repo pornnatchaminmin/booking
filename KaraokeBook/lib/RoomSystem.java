@@ -2,7 +2,6 @@ package lib;
 
 import java.io.*;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -32,8 +31,11 @@ public class RoomSystem {
      * @param start เวลาที่เริ่มจอง
      * @param end   เวลาที่จบ
      */
-    public void addBookRoom(Room room, User user, LocalDateTime start, LocalDateTime end) {
+    public void addBookRoom(Room room, User user, LocalDateTime start, LocalDateTime end) throws Exception{
         //ต้องเช็กด้วยว่ามีค่านั้นไหม
+        if(checkLocalDateTimeIsSame(room, start,end)){
+            throw new Exception("This room has already been reserved.");
+        }
         try {
             fw = new FileWriter(fileRoomList, true);
             bw = new BufferedWriter(fw);
@@ -116,7 +118,7 @@ public class RoomSystem {
         return sum;
     }
 
-    public boolean checkLocalDateTimeIsSame(Room room,LocalDateTime timeStart) {
+    public boolean checkLocalDateTimeIsSame(Room room,LocalDateTime timeStart,LocalDateTime timeEnd) {
         boolean tempBool = false;
         try {
             String tempS;
@@ -125,9 +127,15 @@ public class RoomSystem {
             while ((tempS = br.readLine()) != null) {
                 String[] tempSplit = tempS.split("[;\\-\\:\\)\\(\\s]");
                 //[0]101 [1]1 [2]01 [3]10 [4]2025 [5]12 [6]00 [7]00 [8]01 [9]10 [10]2025 [11]13 [12]00 [13]00 [14]150.0
-                if((String.valueOf(timeStart.getHour()).equals(tempSplit[5])) && room.getIdRoom() == Integer.parseInt(tempSplit[0])){ 
-                   tempBool = true;
+                LocalDateTime tempDateTimeStart = LocalDateTime.of(Integer.parseInt(tempSplit[4]), Integer.parseInt(tempSplit[3]), Integer.parseInt(tempSplit[2]), Integer.parseInt(tempSplit[5]), Integer.parseInt(tempSplit[6]));
+                LocalDateTime tempDateTimeEnd = LocalDateTime.of(Integer.parseInt(tempSplit[10]), Integer.parseInt(tempSplit[9]), Integer.parseInt(tempSplit[8]), Integer.parseInt(tempSplit[11]), Integer.parseInt(tempSplit[12]));
+                if(room.getIdRoom() == Integer.parseInt(tempSplit[0]) && tempDateTimeStart.equals(timeStart) && tempDateTimeEnd.equals(timeEnd)){
+                    tempBool = true;
                 }
+                // if( ( (String.valueOf(room.getIdRoom()))+" "+(String.valueOf(timeStart.getDayOfMonth()))+"-"+(String.valueOf(timeStart.getMonthValue()))+"-"+String.valueOf(timeStart.getYear())+ " "+String.valueOf() ).equals(timeEnd) )
+                // if((String.valueOf(timeStart.getHour()).equals(tempSplit[5])) && room.getIdRoom() == Integer.parseInt(tempSplit[0]) ){ 
+                //    tempBool = true;
+                // }
             }
         } catch (Exception e) {
             System.out.println(e);

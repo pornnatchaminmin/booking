@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import lib.Room;
 import lib.RoomSystem;
+import lib.RoomTime;
 import lib.User;
 
 import java.awt.*;
@@ -12,20 +13,68 @@ import java.time.*;
 import java.util.*;
 
 //ค่อนข้างเสร็จ
-public class listbook extends JFrame {
-        DefaultListModel<String> ModelList1;
-        DefaultListModel<String> ModelList2;
+public class listbook extends JDialog {
+        DefaultListModel<RoomTime> ModelList1;
+        DefaultListModel<RoomTime> ModelList2;
         int year, month, day;
         int hourStart = 13;
-        int hourEnd = 23;
+        int hourEnd = 4;
         int minuteStartEnd = 00;
         User user;
         Room room;
         RoomSystem system;
+        LocalDate date;
 
+        private static class roomTimeListRenderer extends DefaultListCellRenderer {
+                @Override
+                public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                boolean isSelected, boolean cellHasFocus) {
+                        // เรียกเมธอดของ super class ก่อนเพื่อเอา JComponent (JLabel)
+                        // ที่ตั้งค่าพื้นฐานแล้ว
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        // ตรวจสอบว่าข้อมูลที่เข้ามาเป็น Product หรือไม่
+                        if (value instanceof RoomTime) {
+                                RoomTime roomTime = (RoomTime) value;
+                                // ตั้งค่าข้อความให้เป็นชื่อสินค้า
+                                if (roomTime.getTimeStart().getMinute() == 0) {
+                                        setText(roomTime.getTimeStart().getHour() + ":"
+                                                        + roomTime.getTimeStart().getMinute() + "0 - "
+                                                        + roomTime.getTimeEnd().getHour() + ":"
+                                                        + roomTime.getTimeEnd().getMinute() + "0");
+                                } else {
+                                        setText(roomTime.getTimeStart().getHour() + ":"
+                                                        + roomTime.getTimeStart().getMinute() + " - "
+                                                        + roomTime.getTimeEnd().getHour() + ":"
+                                                        + roomTime.getTimeEnd().getMinute());
+                                }
+                        }
+                        return this;
+                        // คิดว่าคือการOverideเพื่อแก้บางอยากถ้าไม่แก้Productข้อมูลจะยัดไปหมดเลย
+                }
+        }
+
+        public listbook(User user, Room room, JFrame j, LocalDate date) {
+                this.user = user;
+                this.room = room;
+                this.date = date;
+                
+                setUpTime(hourStart,hourEnd);
+                setModal(true);
+                setResizable(false);
+                setDefaultCloseOperation(DISPOSE_ON_CLOSE);//
+                setSize(new Dimension(250, 350));
+                setLocationRelativeTo(j);//
+                initComponents();
+        }
+
+        // ----------------------------- test -------------------------------------
         public listbook(User user, Room room) {
                 this.user = user;
                 this.room = room;
+
+                user = new User(1,150);
+                room = new Room("1-5", 101, 150);
 
                 system = new RoomSystem();
                 year = LocalDate.now().getYear();
@@ -34,33 +83,28 @@ public class listbook extends JFrame {
                 // System.out.println(day + " " + month + " " + year);
                 ModelList1 = new DefaultListModel<>();
                 ModelList2 = new DefaultListModel<>();
-                for (int i = 0; i < hourEnd - hourStart; i++) {// ปรับการจัดเวลา24:00
-                        if (!(system.checkLocalDateTimeIsSame(room,
-                                        LocalDateTime.of(year, month, day, hourStart + i, minuteStartEnd)))) {
-                                ModelList1.addElement((hourStart + i) + ":" + minuteStartEnd + "0-"
-                                                + (hourStart + i + 1) + ":"
-                                                + minuteStartEnd + "0"); // ยังมีบัค24:00
-                        }
-                }
+                setUpTime(hourStart, hourEnd);
+
+                setModal(true);
+                setResizable(false);
+                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                setSize(new Dimension(250, 350));
+                setLocationRelativeTo(null);
                 initComponents();
         }
+        // ----------------------------- test -------------------------------------
 
         private void initComponents() {
                 jPanel1 = new JPanel();
                 jPanel2 = new JPanel();
                 jLabel1 = new JLabel();
                 jScrollPane1 = new JScrollPane();
-                jList1 = new JList<>();
+                jListLeft = new JList<>();
                 jScrollPane2 = new JScrollPane();
-                jList2 = new JList<>();
+                jListRight = new JList<>();
                 jButton1 = new JButton();
                 jButton2 = new JButton();
                 jButton3 = new JButton();
-
-                setResizable(false);
-                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                setSize(new Dimension(250, 350));
-                setLocationRelativeTo(null);
 
                 jPanel1.setBackground(new Color(235, 240, 255));
 
@@ -88,15 +132,17 @@ public class listbook extends JFrame {
 
                 jScrollPane1.setBackground(new Color(255, 241, 234));
 
-                jList1.setBackground(new Color(255, 241, 234));
-                jList1.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
-                jList1.setModel(ModelList1);
-                jScrollPane1.setViewportView(jList1);
+                jListLeft.setBackground(new Color(255, 241, 234));
+                jListLeft.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+                jListLeft.setModel(ModelList1);
+                jListLeft.setCellRenderer(new roomTimeListRenderer());//
+                jScrollPane1.setViewportView(jListLeft);
 
-                jList2.setBackground(new Color(255, 241, 234));
-                jList2.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
-                jList2.setModel(ModelList2);
-                jScrollPane2.setViewportView(jList2);
+                jListRight.setBackground(new Color(255, 241, 234));
+                jListRight.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+                jListRight.setModel(ModelList2);
+                jListRight.setCellRenderer(new roomTimeListRenderer());//
+                jScrollPane2.setViewportView(jListRight);
 
                 jButton1.setBackground(new Color(183, 255, 207));
                 jButton1.setFont(new Font("MS Gothic", 0, 18)); // NOI18N
@@ -117,8 +163,6 @@ public class listbook extends JFrame {
                                 jButtonRemoveRoom(evt);
                         }
                 });
-                // jButton2.setBorder(new border.MatteBorder());
-
                 jButton3.setBackground(new Color(205, 255, 255));
                 jButton3.setFont(new Font("MS Gothic", 0, 18)); // NOI18N
                 jButton3.setText("Confirm");
@@ -243,49 +287,127 @@ public class listbook extends JFrame {
                 pack();
         }// </editor-fold>//GEN-END:initComponents
 
+
         private void jButtonRemoveRoom(ActionEvent evt) {
-                if (jList2.getSelectedValue() != null) {
+                if (jListRight.getSelectedValue() != null) {
                         // System.out.println(jList2.getSelectedValue());
-                        ModelList1.addElement(jList2.getSelectedValue());
-                        ArrayList<String> listSort = Collections.list(ModelList1.elements());
-                        Collections.sort(listSort);
+                        ModelList1.addElement(jListRight.getSelectedValue());
+                        ArrayList<RoomTime> listSort = Collections.list(ModelList1.elements());
+                        Collections.sort(listSort, (r1, r2) -> Integer.compare(r1.getTimeStart().getHour(),
+                                        r2.getTimeStart().getHour()));
                         ModelList1.clear();
                         for (int i = 0; i < listSort.size(); i++) {
                                 ModelList1.addElement(listSort.get(i));
                         }
-                        ModelList2.removeElementAt(jList2.getSelectedIndex());
-                        jList2.setModel(ModelList2);
-                        jList1.setModel(ModelList1);
+                        ModelList2.removeElementAt(jListRight.getSelectedIndex());
+                        jListRight.setModel(ModelList2);
+                        jListLeft.setModel(ModelList1);
                 }
         }
 
         private void jButtonAddRoom(ActionEvent evt) {
-                if (jList1.getSelectedValue() != null) {
-                        ModelList2.addElement(jList1.getSelectedValue());
-                        ArrayList<String> listSort = Collections.list(ModelList2.elements());
-                        Collections.sort(listSort);
+                if (jListLeft.getSelectedValue() != null) {
+                        ModelList2.addElement(jListLeft.getSelectedValue());
+                        ArrayList<RoomTime> listSort = Collections.list(ModelList2.elements());
+                        Collections.sort(listSort, (r1, r2) -> Integer.compare(r1.getTimeStart().getHour(),
+                                        r2.getTimeStart().getHour()));
                         ModelList2.clear();
                         for (int i = 0; i < listSort.size(); i++) {
                                 ModelList2.addElement(listSort.get(i));
                         }
-                        ModelList1.removeElementAt(jList1.getSelectedIndex());
-                        jList2.setModel(ModelList2);
-                        jList1.setModel(ModelList1);
+                        ModelList1.removeElementAt(jListLeft.getSelectedIndex());
+                        jListRight.setModel(ModelList2);
+                        jListLeft.setModel(ModelList1);
                 }
         }
 
         private void jButtonConfirmRoom(ActionEvent evt) {
+                ArrayList<RoomTime> tempRoomTime = new ArrayList<>();
+                boolean check = false;
                 for (int i = 0; i < ModelList2.size(); i++) {
-                        String tempModel = ModelList2.get(i);
-                        String[] tempArray = tempModel.split("[:\\-]");
-                        system.addBookRoom(room, user,
-                                        LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[0]),
-                                                        Integer.parseInt(tempArray[1])),
-                                        LocalDateTime.of(year, month, day, Integer.parseInt(tempArray[2]),
-                                                        Integer.parseInt(tempArray[3])));
+                        RoomTime tempModel = ModelList2.get(i);
+                        if (!(system.checkLocalDateTimeIsSame(tempModel.getRoom(), tempModel.getTimeStart(),
+                                        tempModel.getTimeEnd()))) {
+                                tempRoomTime.add(tempModel);
+
+                        } else {
+                                if (check == false) {
+                                        JOptionPane.showMessageDialog(this, "The time matches what others have booked.",
+                                                        "",
+                                                        JOptionPane.ERROR_MESSAGE);
+                                }
+                                check = true;
+                        }
                 }
                 ModelList2.clear();
-                jList2.setModel(ModelList2);
+
+                if (check == false) {
+                        for (int i = 0; i < tempRoomTime.size(); i++) {
+                                try {
+                                        system.addBookRoom(tempRoomTime.get(i).getRoom(), tempRoomTime.get(i).getUser(),
+                                                        tempRoomTime.get(i).getTimeStart(),
+                                                        tempRoomTime.get(i).getTimeEnd());
+                                } catch (Exception e) {
+                                        System.out.println(e);
+                                }
+                        }
+                } else {
+                        Collections.sort(tempRoomTime, (r1, r2) -> Integer.compare(r1.getTimeStart().getHour(),
+                                        r2.getTimeStart().getHour()));
+                        for (int i = 0; i < tempRoomTime.size(); i++) {
+                                ModelList2.addElement(tempRoomTime.get(i));
+
+                        }
+                }
+                jListRight.setModel(ModelList2);
+        }
+        public void setUpTime(int TimeStart,int TimeEnd){
+                if(TimeStart == TimeEnd){
+                        throw new RuntimeException("TimeStart and TimeEnd is same");
+                }
+                system = new RoomSystem();
+                year = date.getYear();
+                month = date.getMonthValue();
+                day = date.getDayOfMonth();
+                ModelList1 = new DefaultListModel<>();
+                ModelList2 = new DefaultListModel<>();
+                int loopHour1;
+                int loopHour2;
+                if(hourEnd-hourStart >= 0){
+                        loopHour1 = 0;
+                        loopHour2 = hourEnd-hourStart;
+                }else{
+                        loopHour1 = hourEnd;
+                        loopHour2 = 24-hourStart;
+                }
+                for (int i = 0; i < loopHour1; i++) {
+                        hourStart = hourStart % 24;
+                        if (!(system.checkLocalDateTimeIsSame(room,
+                                        LocalDateTime.of(year, month, day, loopHour1+ i,
+                                                        minuteStartEnd),
+                                        LocalDateTime.of(year, month, day, loopHour1 + i + 1, minuteStartEnd)))
+                                        && LocalDateTime.now().isBefore(LocalDateTime.of(year, month, day,0+i,minuteStartEnd))) {
+                                ModelList1.addElement(new RoomTime(room, user,
+                                                LocalDateTime.of(year, month, day, 0 + i, minuteStartEnd),
+                                                LocalDateTime.of(year, month, day, 0 + i + 1, minuteStartEnd)));
+                        }
+                }
+                for (int i = 0; i < loopHour2; i++) {// ปรับการจัดเวลา24:00
+                        int temphourStart = hourStart + i;
+                        int temphourStartNext = hourStart + i + 1;
+                        if (temphourStart + 1 == 24) {
+                                temphourStartNext = 0;
+                        }
+                        if (!(system.checkLocalDateTimeIsSame(room,
+                                        LocalDateTime.of(year, month, day, temphourStart,
+                                                        minuteStartEnd),
+                                        LocalDateTime.of(year, month, day, temphourStartNext, minuteStartEnd)))
+                                        && LocalDateTime.now().isBefore(LocalDateTime.of(year, month, day,temphourStart,minuteStartEnd))) {
+                                ModelList1.addElement(new RoomTime(room, user,
+                                                LocalDateTime.of(year, month, day, temphourStart, minuteStartEnd),
+                                                LocalDateTime.of(year, month, day, temphourStartNext, minuteStartEnd)));
+                        }
+                }
         }
 
         /**
@@ -294,21 +416,25 @@ public class listbook extends JFrame {
         public static void main(String args[]) {
                 RoomSystem system = new RoomSystem();
                 Room room1 = new Room("1-5", 101, 150);
-                User user1 = new User(2);
-                system.addBookRoom(room1, user1,
-                                LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
-                                                LocalDate.now().getDayOfMonth(),
-                                                12, 0, 0),
-                                LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
-                                                LocalDate.now().getDayOfMonth(),
-                                                13, 0, 0));
-                system.addBookRoom(room1, user1,
-                                LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
-                                                LocalDate.now().getDayOfMonth(),
-                                                15, 0, 0),
-                                LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
-                                                LocalDate.now().getDayOfMonth(),
-                                                16, 0, 0));
+                User user1 = new User(2,150);
+                try {
+                        system.addBookRoom(room1, user1,
+                                        LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                                                        LocalDate.now().getDayOfMonth(),
+                                                        12, 0, 0),
+                                        LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                                                        LocalDate.now().getDayOfMonth(),
+                                                        13, 0, 0));
+                        system.addBookRoom(room1, user1,
+                                        LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                                                        LocalDate.now().getDayOfMonth(),
+                                                        15, 0, 0),
+                                        LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),
+                                                        LocalDate.now().getDayOfMonth(),
+                                                        16, 0, 0));
+                } catch (Exception e) {
+                        System.out.println(e);
+                }
                 try {
                         for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                                 if ("Nimbus".equals(info.getName())) {
@@ -334,7 +460,7 @@ public class listbook extends JFrame {
                 /* Create and display the form */
                 EventQueue.invokeLater(new Runnable() {
                         public void run() {
-                                new listbook(new User(1), new Room("1-5", 101, 150)).setVisible(true);
+                                new listbook(new User(1,150), new Room("1-5", 101, 150)).setVisible(true);
                         }
                 });
         }
@@ -344,8 +470,8 @@ public class listbook extends JFrame {
         private JButton jButton2;
         private JButton jButton3;
         private JLabel jLabel1;
-        private JList<String> jList1;
-        private JList<String> jList2;
+        private JList<RoomTime> jListLeft;
+        private JList<RoomTime> jListRight;
         private JPanel jPanel1;
         private JPanel jPanel2;
         private JScrollPane jScrollPane1;

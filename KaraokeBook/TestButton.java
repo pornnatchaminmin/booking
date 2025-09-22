@@ -35,6 +35,7 @@ public class TestButton extends JFrame {
         jScrollPane1 = new JScrollPane();
         jPanel2 = new JPanel();
         jComboBox1 = new JComboBox<>();
+
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(new Dimension(540, 960));
         setLocationRelativeTo(null);
@@ -71,7 +72,7 @@ public class TestButton extends JFrame {
                             if(date == null){
                                 date = LocalDate.now();
                             }
-                            listbook list = new listbook(new User(1), tempRoom,TestButton.this,date);
+                            listbook list = new listbook(new User(1,150), tempRoom,TestButton.this,date);
                             list.setVisible(true);
                 }
             });
